@@ -1,0 +1,41 @@
+# =============================================================================
+# Deploy to Production — Build and deploy with docker compose prod config
+# Runs on push to main (i.e., after a PR is merged)
+# =============================================================================
+
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and deploy with production config
+        run: |
+          docker compose \
+            -f docker/docker-compose.yml \
+            -f docker/docker-compose.prod.yml \
+            --env-file .env.prod \
+            up --build -d
+
+      - name: Verify containers are running
+        run: |
+          # Give containers a moment to start
+          sleep 5
+          docker compose \
+            -f docker/docker-compose.yml \
+            -f docker/docker-compose.prod.yml \
+            --env-file .env.prod \
+            ps

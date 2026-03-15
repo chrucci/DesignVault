@@ -1,0 +1,19 @@
+# =============================================================================
+# Design Vault — Production environment overrides
+# Usage: docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+# Requires .env.prod in the project root
+# =============================================================================
+
+services:
+  web:
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${PROD_NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${PROD_NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${PROD_SUPABASE_SERVICE_ROLE_KEY}
+      - NEXT_PUBLIC_APP_URL=${PROD_NEXT_PUBLIC_APP_URL}
+
+  cloudflared:
+    environment:
+      - TUNNEL_TOKEN=${PROD_CLOUDFLARE_TUNNEL_TOKEN}

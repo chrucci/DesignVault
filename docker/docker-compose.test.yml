@@ -1,0 +1,19 @@
+# =============================================================================
+# Design Vault — Test environment overrides
+# Usage: docker compose -f docker/docker-compose.yml -f docker/docker-compose.test.yml up
+# Requires .env.test in the project root
+# =============================================================================
+
+services:
+  web:
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${TEST_NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${TEST_NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${TEST_SUPABASE_SERVICE_ROLE_KEY}
+      - NEXT_PUBLIC_APP_URL=${TEST_NEXT_PUBLIC_APP_URL}
+
+  cloudflared:
+    environment:
+      - TUNNEL_TOKEN=${TEST_CLOUDFLARE_TUNNEL_TOKEN}

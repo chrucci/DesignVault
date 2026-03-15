@@ -1,0 +1,43 @@
+# =============================================================================
+# Deploy to Test — Build and deploy with docker compose test config
+# Runs on pull requests to main after CI passes
+# =============================================================================
+
+name: Deploy Test
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: deploy-test
+  cancel-in-progress: true
+
+jobs:
+  deploy-test:
+    name: Deploy to Test
+    runs-on: self-hosted
+    # Only deploy after CI workflow checks have passed
+    needs: []
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build and deploy with test config
+        run: |
+          docker compose \
+            -f docker/docker-compose.yml \
+            -f docker/docker-compose.test.yml \
+            --env-file .env.test \
+            up --build -d
+
+      - name: Verify containers are running
+        run: |
+          # Give containers a moment to start
+          sleep 5
+          docker compose \
+            -f docker/docker-compose.yml \
+            -f docker/docker-compose.test.yml \
+            --env-file .env.test \
+            ps

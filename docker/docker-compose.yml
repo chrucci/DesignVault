@@ -1,0 +1,33 @@
+# =============================================================================
+# Design Vault — Base Docker Compose configuration
+# Usage: docker compose -f docker/docker-compose.yml up
+# Override with docker-compose.test.yml or docker-compose.prod.yml for envs
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Web application (Next.js with standalone output)
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: ../
+      dockerfile: apps/web/Dockerfile
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Cloudflare Tunnel — exposes the web service via Cloudflare without
+  # opening inbound ports on the host
+  # ---------------------------------------------------------------------------
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+    depends_on:
+      - web
