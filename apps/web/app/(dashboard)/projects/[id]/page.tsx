@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -161,6 +162,9 @@ export default function ProjectDetailPage() {
         <Button onClick={() => setEditing(true)}>Edit</Button>
         <Button variant="outline" onClick={() => setAddRoomOpen(true)}>
           Add Room
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href={`/projects/${projectId}/documents`}>Documents</Link>
         </Button>
       </div>
 

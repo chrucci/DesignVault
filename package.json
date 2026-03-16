@@ -21,6 +21,8 @@
   "packageManager": "pnpm@10.9.0",
   "pnpm": {
     "onlyBuiltDependencies": [
+      "esbuild",
+      "puppeteer",
       "sharp",
       "unrs-resolver"
     ]
