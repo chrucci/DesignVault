@@ -4,5 +4,5 @@ export default function GeneratePage() {
       <h1 className="text-3xl font-bold">Generate Documents</h1>
       <p className="text-muted-foreground">Coming soon</p>
     </div>
-  )
+  );
 }

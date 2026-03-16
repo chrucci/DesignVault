@@ -1,17 +1,17 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface TabsContextValue {
-  value: string
-  onValueChange: (value: string) => void
+  value: string;
+  onValueChange: (value: string) => void;
 }
 
 const TabsContext = React.createContext<TabsContextValue>({
-  value: "",
+  value: '',
   onValueChange: () => {},
-})
+});
 
 function Tabs({
   defaultValue,
@@ -20,41 +20,35 @@ function Tabs({
   children,
   className,
 }: {
-  defaultValue?: string
-  value?: string
-  onValueChange?: (value: string) => void
-  children: React.ReactNode
-  className?: string
+  defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  children: React.ReactNode;
+  className?: string;
 }) {
-  const [internalValue, setInternalValue] = React.useState(defaultValue || "")
-  const value = controlledValue !== undefined ? controlledValue : internalValue
-  const handleChange = onValueChange || setInternalValue
+  const [internalValue, setInternalValue] = React.useState(defaultValue || '');
+  const value = controlledValue !== undefined ? controlledValue : internalValue;
+  const handleChange = onValueChange || setInternalValue;
 
   return (
     <TabsContext.Provider value={{ value, onValueChange: handleChange }}>
       <div className={className}>{children}</div>
     </TabsContext.Provider>
-  )
+  );
 }
 
-function TabsList({
-  children,
-  className,
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+function TabsList({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div
       role="tablist"
       className={cn(
-        "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
-        className
+        'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+        className,
       )}
     >
       {children}
     </div>
-  )
+  );
 }
 
 function TabsTrigger({
@@ -62,28 +56,28 @@ function TabsTrigger({
   children,
   className,
 }: {
-  value: string
-  children: React.ReactNode
-  className?: string
+  value: string;
+  children: React.ReactNode;
+  className?: string;
 }) {
-  const context = React.useContext(TabsContext)
-  const isActive = context.value === value
+  const context = React.useContext(TabsContext);
+  const isActive = context.value === value;
 
   return (
     <button
       role="tab"
       aria-selected={isActive}
-      data-state={isActive ? "active" : "inactive"}
+      data-state={isActive ? 'active' : 'inactive'}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-        isActive && "bg-background text-foreground shadow",
-        className
+        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+        isActive && 'bg-background text-foreground shadow',
+        className,
       )}
       onClick={() => context.onValueChange(value)}
     >
       {children}
     </button>
-  )
+  );
 }
 
 function TabsContent({
@@ -91,22 +85,25 @@ function TabsContent({
   children,
   className,
 }: {
-  value: string
-  children: React.ReactNode
-  className?: string
+  value: string;
+  children: React.ReactNode;
+  className?: string;
 }) {
-  const context = React.useContext(TabsContext)
+  const context = React.useContext(TabsContext);
 
-  if (context.value !== value) return null
+  if (context.value !== value) return null;
 
   return (
     <div
       role="tabpanel"
-      className={cn("mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", className)}
+      className={cn(
+        'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        className,
+      )}
     >
       {children}
     </div>
-  )
+  );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent };

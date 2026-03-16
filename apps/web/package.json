@@ -7,33 +7,41 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@design-vault/shared": "workspace:*",
-    "@supabase/supabase-js": "^2",
+    "@hookform/resolvers": "^5",
     "@supabase/ssr": "^0.6",
+    "@supabase/supabase-js": "^2",
+    "class-variance-authority": "^0.7",
+    "clsx": "^2",
+    "lucide-react": "^0.488",
     "next": "^15",
     "react": "^19",
     "react-dom": "^19",
-    "zod": "^3.24",
-    "@hookform/resolvers": "^5",
     "react-hook-form": "^7",
-    "class-variance-authority": "^0.7",
-    "clsx": "^2",
     "tailwind-merge": "^3",
-    "lucide-react": "^0.488"
+    "zod": "^3.24"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5.7",
-    "tailwindcss": "^4",
-    "@tailwindcss/postcss": "^4",
-    "postcss": "^8",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
     "eslint-config-next": "^15",
-    "@eslint/eslintrc": "^3"
+    "eslint-plugin-security": "^4.0.0",
+    "jsdom": "^29.0.0",
+    "postcss": "^8",
+    "tailwindcss": "^4",
+    "typescript": "^5.7",
+    "vitest": "^4.1.0"
   }
 }

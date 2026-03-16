@@ -19,13 +19,13 @@ export interface ClipProductRequest {
   install_notes?: string;
   spec_url?: string;
   image_urls?: string[]; // URLs from the supplier page to download
-  project_id?: string;   // optional: assign directly to a project
-  room_id?: string;      // optional: assign directly to a room
+  project_id?: string; // optional: assign directly to a project
+  room_id?: string; // optional: assign directly to a room
 }
 
 export interface GeneratePdfRequest {
   project_id: string;
-  room_ids?: string[];   // optional: generate for specific rooms only
+  room_ids?: string[]; // optional: generate for specific rooms only
 }
 
 export interface GenerateInvoiceRequest extends GeneratePdfRequest {

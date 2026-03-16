@@ -1,5 +1,5 @@
 # =============================================================================
-# CI Pipeline — Lint, typecheck, build, and e2e tests
+# CI Pipeline — Quality checks, unit tests, build, and e2e tests
 # Runs on every pull request targeting the main branch
 # =============================================================================
 
@@ -15,10 +15,10 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Job 1: Lint and typecheck across the entire monorepo
+  # Job 1: Lint, typecheck, format, security scan, unit tests
   # ---------------------------------------------------------------------------
-  lint-and-typecheck:
-    name: Lint & Typecheck
+  quality:
+    name: Quality Checks
     runs-on: self-hosted
 
     steps:
@@ -37,8 +37,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run lint and typecheck
+      - name: Lint & Typecheck (includes security rules)
         run: pnpm turbo lint typecheck
+
+      - name: Check formatting (Prettier)
+        run: pnpm format:check
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high || true
+
+      - name: Run unit tests (Vitest)
+        run: pnpm turbo test
 
   # ---------------------------------------------------------------------------
   # Job 2: Build the Next.js web application
@@ -46,6 +55,7 @@ jobs:
   build:
     name: Build
     runs-on: self-hosted
+    needs: quality
 
     steps:
       - name: Checkout repository
@@ -68,12 +78,13 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Job 3: End-to-end tests with Playwright
-  # Depends on build to ensure the app compiles before running expensive tests
+  # Only runs when Supabase is configured (skipped until then)
   # ---------------------------------------------------------------------------
   e2e-tests:
     name: E2E Tests
     runs-on: self-hosted
     needs: build
+    if: ${{ vars.SUPABASE_CONFIGURED == 'true' }}
 
     steps:
       - name: Checkout repository
@@ -98,9 +109,8 @@ jobs:
         run: pnpm --filter @design-vault/web build
 
       - name: Run Playwright tests
-        run: pnpm --filter @design-vault/e2e test
+        run: pnpm test:e2e
         env:
-          # Playwright will start the dev server via webServer config in playwright.config.ts
           CI: true
 
       - name: Upload Playwright report

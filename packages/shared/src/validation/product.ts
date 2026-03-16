@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-export const stockStatusSchema = z.enum([
-  'in_stock',
-  'out_of_stock',
-  'special_order',
-  'unknown',
-]);
+export const stockStatusSchema = z.enum(['in_stock', 'out_of_stock', 'special_order', 'unknown']);
 
 export const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),

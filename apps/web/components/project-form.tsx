@@ -1,50 +1,43 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import * as React from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 interface ProjectFormProps {
   initialData?: {
-    id?: string
-    name: string
-    client_name: string
-    status: string
-    notes: string
-  }
+    id?: string;
+    name: string;
+    client_name: string;
+    status: string;
+    notes: string;
+  };
   onSave: (data: {
-    name: string
-    client_name: string
-    status: string
-    notes: string
-  }) => void | Promise<void>
-  saving?: boolean
+    name: string;
+    client_name: string;
+    status: string;
+    notes: string;
+  }) => void | Promise<void>;
+  saving?: boolean;
 }
 
 export function ProjectForm({ initialData, onSave, saving }: ProjectFormProps) {
-  const [name, setName] = React.useState(initialData?.name ?? "")
-  const [clientName, setClientName] = React.useState(
-    initialData?.client_name ?? ""
-  )
-  const [status, setStatus] = React.useState(initialData?.status ?? "active")
-  const [notes, setNotes] = React.useState(initialData?.notes ?? "")
+  const [name, setName] = React.useState(initialData?.name ?? '');
+  const [clientName, setClientName] = React.useState(initialData?.client_name ?? '');
+  const [status, setStatus] = React.useState(initialData?.status ?? 'active');
+  const [notes, setNotes] = React.useState(initialData?.notes ?? '');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await onSave({ name, client_name: clientName, status, notes })
-  }
+    e.preventDefault();
+    await onSave({ name, client_name: clientName, status, notes });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="project-name">Name</Label>
-        <Input
-          id="project-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
 
       <div className="space-y-2">
@@ -82,8 +75,8 @@ export function ProjectForm({ initialData, onSave, saving }: ProjectFormProps) {
       </div>
 
       <Button type="submit" disabled={saving}>
-        {saving ? "Saving..." : "Save"}
+        {saving ? 'Saving...' : 'Save'}
       </Button>
     </form>
-  )
+  );
 }

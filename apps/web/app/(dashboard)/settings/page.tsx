@@ -1,87 +1,91 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 
 interface TaxRate {
-  id: string
-  state: string
-  rate: number
+  id: string;
+  state: string;
+  rate: number;
 }
 
 interface BusinessInfo {
-  id: string
-  business_name: string | null
-  contact_name: string | null
-  phone: string | null
-  email: string | null
-  address: string | null
+  id: string;
+  business_name: string | null;
+  contact_name: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
 }
 
 export default function SettingsPage() {
-  const [taxRates, setTaxRates] = React.useState<TaxRate[]>([])
-  const [newState, setNewState] = React.useState("")
-  const [newRate, setNewRate] = React.useState("")
+  const [taxRates, setTaxRates] = React.useState<TaxRate[]>([]);
+  const [newState, setNewState] = React.useState('');
+  const [newRate, setNewRate] = React.useState('');
   const [businessInfo, setBusinessInfo] = React.useState<BusinessInfo>({
-    id: "",
-    business_name: "",
-    contact_name: "",
-    phone: "",
-    email: "",
-    address: "",
-  })
+    id: '',
+    business_name: '',
+    contact_name: '',
+    phone: '',
+    email: '',
+    address: '',
+  });
 
   React.useEffect(() => {
-    const supabase = createClient()
+    const supabase = createClient();
 
     supabase
-      .from("tax_rates")
-      .select("*")
-      .order("state")
+      .from('tax_rates')
+      .select('*')
+      .order('state')
       .then(({ data }) => {
-        if (data) setTaxRates(data)
-      })
+        if (data) setTaxRates(data);
+      });
 
     supabase
-      .from("business_info")
-      .select("*")
+      .from('business_info')
+      .select('*')
       .limit(1)
       .single()
       .then(({ data }) => {
-        if (data) setBusinessInfo(data)
-      })
-  }, [])
+        if (data) setBusinessInfo(data);
+      });
+  }, []);
 
   const addTaxRate = async () => {
-    if (!newState || !newRate) return
-    const supabase = createClient()
+    if (!newState || !newRate) return;
+    const supabase = createClient();
     const { data } = await supabase
-      .from("tax_rates")
+      .from('tax_rates')
       .upsert({ state: newState, rate: parseFloat(newRate) })
       .select()
-      .single()
+      .single();
     if (data) {
-      setTaxRates((prev) => [...prev.filter((t) => t.state !== newState), data].sort((a, b) => a.state.localeCompare(b.state)))
-      setNewState("")
-      setNewRate("")
+      setTaxRates((prev) =>
+        [...prev.filter((t) => t.state !== newState), data].sort((a, b) =>
+          a.state.localeCompare(b.state),
+        ),
+      );
+      setNewState('');
+      setNewRate('');
     }
-  }
+  };
 
   const deleteTaxRate = async (id: string) => {
-    const supabase = createClient()
-    await supabase.from("tax_rates").delete().eq("id", id)
-    setTaxRates((prev) => prev.filter((t) => t.id !== id))
-  }
+    const supabase = createClient();
+    await supabase.from('tax_rates').delete().eq('id', id);
+    setTaxRates((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const saveBusinessInfo = async () => {
-    const supabase = createClient()
+    const supabase = createClient();
     if (businessInfo.id) {
       await supabase
-        .from("business_info")
+        .from('business_info')
         .update({
           business_name: businessInfo.business_name,
           contact_name: businessInfo.contact_name,
@@ -89,17 +93,17 @@ export default function SettingsPage() {
           email: businessInfo.email,
           address: businessInfo.address,
         })
-        .eq("id", businessInfo.id)
+        .eq('id', businessInfo.id);
     } else {
-      await supabase.from("business_info").insert({
+      await supabase.from('business_info').insert({
         business_name: businessInfo.business_name,
         contact_name: businessInfo.contact_name,
         phone: businessInfo.phone,
         email: businessInfo.email,
         address: businessInfo.address,
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="space-y-8">
@@ -115,11 +119,7 @@ export default function SettingsPage() {
               <div key={rate.id} className="flex items-center gap-4">
                 <span className="w-24 font-medium">{rate.state}</span>
                 <span>{rate.rate}%</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteTaxRate(rate.id)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => deleteTaxRate(rate.id)}>
                   Delete
                 </Button>
               </div>
@@ -160,7 +160,7 @@ export default function SettingsPage() {
             <Label htmlFor="biz-name">Business Name</Label>
             <Input
               id="biz-name"
-              value={businessInfo.business_name ?? ""}
+              value={businessInfo.business_name ?? ''}
               onChange={(e) =>
                 setBusinessInfo((prev) => ({
                   ...prev,
@@ -173,7 +173,7 @@ export default function SettingsPage() {
             <Label htmlFor="biz-contact">Contact Name</Label>
             <Input
               id="biz-contact"
-              value={businessInfo.contact_name ?? ""}
+              value={businessInfo.contact_name ?? ''}
               onChange={(e) =>
                 setBusinessInfo((prev) => ({
                   ...prev,
@@ -186,10 +186,8 @@ export default function SettingsPage() {
             <Label htmlFor="biz-phone">Phone</Label>
             <Input
               id="biz-phone"
-              value={businessInfo.phone ?? ""}
-              onChange={(e) =>
-                setBusinessInfo((prev) => ({ ...prev, phone: e.target.value }))
-              }
+              value={businessInfo.phone ?? ''}
+              onChange={(e) => setBusinessInfo((prev) => ({ ...prev, phone: e.target.value }))}
             />
           </div>
           <div className="space-y-2">
@@ -197,17 +195,15 @@ export default function SettingsPage() {
             <Input
               id="biz-email"
               type="email"
-              value={businessInfo.email ?? ""}
-              onChange={(e) =>
-                setBusinessInfo((prev) => ({ ...prev, email: e.target.value }))
-              }
+              value={businessInfo.email ?? ''}
+              onChange={(e) => setBusinessInfo((prev) => ({ ...prev, email: e.target.value }))}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="biz-address">Address</Label>
             <Input
               id="biz-address"
-              value={businessInfo.address ?? ""}
+              value={businessInfo.address ?? ''}
               onChange={(e) =>
                 setBusinessInfo((prev) => ({
                   ...prev,
@@ -220,5 +216,5 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

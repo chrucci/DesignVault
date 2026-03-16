@@ -27,11 +27,11 @@ Deb is an interior decorator who shops ~100 supplier websites for products. Her 
 
 ## Platforms
 
-| Platform | Capability |
-|----------|-----------|
-| **Desktop** (Chrome/Edge) | Full app + browser extension |
-| **Tablet** (Android) | Full app + browser extension (Chrome) |
-| **Phone** | View-only — browse projects and clipped products, no clipping |
+| Platform                  | Capability                                                    |
+| ------------------------- | ------------------------------------------------------------- |
+| **Desktop** (Chrome/Edge) | Full app + browser extension                                  |
+| **Tablet** (Android)      | Full app + browser extension (Chrome)                         |
+| **Phone**                 | View-only — browse projects and clipped products, no clipping |
 
 ---
 

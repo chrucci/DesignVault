@@ -1,13 +1,11 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 function getClient(): SupabaseClient {
   const url = process.env.TEST_SUPABASE_URL;
   const key = process.env.TEST_SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !key) {
-    throw new Error(
-      "Missing required env vars: TEST_SUPABASE_URL, TEST_SUPABASE_SERVICE_ROLE_KEY",
-    );
+    throw new Error('Missing required env vars: TEST_SUPABASE_URL, TEST_SUPABASE_SERVICE_ROLE_KEY');
   }
 
   return createClient(url, key, {
@@ -25,13 +23,13 @@ export async function seedProduct(
   const db = getClient();
   const defaults = {
     name: `Test Product ${Date.now()}`,
-    brand: "Test Brand",
+    brand: 'Test Brand',
     wholesale_price: 100,
     markup_percent: 50,
   };
 
   const { data, error } = await db
-    .from("products")
+    .from('products')
     .insert({ ...defaults, ...overrides })
     .select()
     .single();
@@ -46,12 +44,12 @@ export async function seedProject(
   const db = getClient();
   const defaults = {
     name: `Test Project ${Date.now()}`,
-    client_name: "Test Client",
-    status: "active",
+    client_name: 'Test Client',
+    status: 'active',
   };
 
   const { data, error } = await db
-    .from("projects")
+    .from('projects')
     .insert({ ...defaults, ...overrides })
     .select()
     .single();
@@ -71,7 +69,7 @@ export async function seedRoom(
   };
 
   const { data, error } = await db
-    .from("rooms")
+    .from('rooms')
     .insert({ ...defaults, ...overrides })
     .select()
     .single();
@@ -93,7 +91,7 @@ export async function seedRoomProduct(
   };
 
   const { data, error } = await db
-    .from("room_products")
+    .from('room_products')
     .insert({ ...defaults, ...overrides })
     .select()
     .single();
@@ -108,10 +106,13 @@ export async function seedRoomProduct(
 export async function clearAll(): Promise<void> {
   const db = getClient();
 
-  const tables = ["room_products", "rooms", "product_images", "products", "projects"];
+  const tables = ['room_products', 'rooms', 'product_images', 'products', 'projects'];
 
   for (const table of tables) {
-    const { error } = await db.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    const { error } = await db
+      .from(table)
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000');
     if (error) {
       console.warn(`clearAll: failed to clear ${table}: ${error.message}`);
     }

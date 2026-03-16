@@ -1,42 +1,42 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { createClient } from "@/lib/supabase/client"
+import * as React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 
 interface OrderItem {
-  id: string
-  name: string
-  source_url: string | null
-  quantity: number
-  wholesale_price: number | null
-  domain: string
+  id: string;
+  name: string;
+  source_url: string | null;
+  quantity: number;
+  wholesale_price: number | null;
+  domain: string;
 }
 
 export default function OrdersPage() {
-  const [items, setItems] = React.useState<OrderItem[]>([])
-  const [checked, setChecked] = React.useState<Record<string, boolean>>({})
+  const [items, setItems] = React.useState<OrderItem[]>([]);
+  const [checked, setChecked] = React.useState<Record<string, boolean>>({});
 
   React.useEffect(() => {
-    const supabase = createClient()
+    const supabase = createClient();
 
     supabase
-      .from("room_products")
+      .from('room_products')
       .select(
-        "id, quantity, product:products(id, name, source_url, wholesale_price), room:rooms(project:projects(status))"
+        'id, quantity, product:products(id, name, source_url, wholesale_price), room:rooms(project:projects(status))',
       )
       .then(({ data }) => {
-        if (!data) return
-        const orderItems: OrderItem[] = []
+        if (!data) return;
+        const orderItems: OrderItem[] = [];
         for (const rp of data as Record<string, unknown>[]) {
-          const product = rp.product as Record<string, unknown> | null
-          const room = rp.room as Record<string, unknown> | null
-          const project = room?.project as Record<string, unknown> | null
-          if (project?.status !== "active" || !product) continue
-          let domain = "other"
+          const product = rp.product as Record<string, unknown> | null;
+          const room = rp.room as Record<string, unknown> | null;
+          const project = room?.project as Record<string, unknown> | null;
+          if (project?.status !== 'active' || !product) continue;
+          let domain = 'other';
           try {
             if (product.source_url) {
-              domain = new URL(product.source_url as string).hostname
+              domain = new URL(product.source_url as string).hostname;
             }
           } catch {}
           orderItems.push({
@@ -46,17 +46,17 @@ export default function OrdersPage() {
             quantity: rp.quantity as number,
             wholesale_price: product.wholesale_price as number | null,
             domain,
-          })
+          });
         }
-        setItems(orderItems)
-      })
-  }, [])
+        setItems(orderItems);
+      });
+  }, []);
 
   const grouped = items.reduce<Record<string, OrderItem[]>>((acc, item) => {
-    if (!acc[item.domain]) acc[item.domain] = []
-    acc[item.domain].push(item)
-    return acc
-  }, {})
+    if (!acc[item.domain]) acc[item.domain] = [];
+    acc[item.domain].push(item);
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-6">
@@ -96,13 +96,9 @@ export default function OrdersPage() {
                       Link
                     </a>
                   )}
-                  <span className="text-sm text-muted-foreground">
-                    Qty: {item.quantity}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Qty: {item.quantity}</span>
                   {item.wholesale_price != null && (
-                    <span className="text-sm font-medium">
-                      ${item.wholesale_price.toFixed(2)}
-                    </span>
+                    <span className="text-sm font-medium">${item.wholesale_price.toFixed(2)}</span>
                   )}
                 </div>
               ))}
@@ -111,5 +107,5 @@ export default function OrdersPage() {
         </Card>
       ))}
     </div>
-  )
+  );
 }

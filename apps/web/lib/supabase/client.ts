@@ -7,10 +7,7 @@ export function createClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
     // During build/prerender, env vars may not be available.
     // Return a dummy client that will be replaced at runtime.
-    return createBrowserClient(
-      'https://placeholder.supabase.co',
-      'placeholder-key'
-    );
+    return createBrowserClient('https://placeholder.supabase.co', 'placeholder-key');
   }
 
   return createBrowserClient(supabaseUrl, supabaseAnonKey);

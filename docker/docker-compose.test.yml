@@ -7,7 +7,7 @@
 services:
   web:
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - NEXT_PUBLIC_SUPABASE_URL=${TEST_NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${TEST_NEXT_PUBLIC_SUPABASE_ANON_KEY}
