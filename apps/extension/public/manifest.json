@@ -3,7 +3,7 @@
   "name": "Design Vault Clipper",
   "version": "1.0.0",
   "description": "Clip products from supplier websites into Design Vault",
-  "permissions": ["activeTab", "sidePanel", "storage"],
+  "permissions": ["activeTab", "tabs", "sidePanel", "storage", "scripting"],
   "host_permissions": [
     "http://localhost:*/*",
     "http://127.0.0.1:*/*",

@@ -76,13 +76,25 @@ export default function ClipForm() {
     return () => chrome.runtime.onMessage.removeListener(listener);
   }, []);
 
-  const handleSelectImages = useCallback(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tab = tabs[0];
-      if (tab?.id) {
-        chrome.tabs.sendMessage(tab.id, { type: 'START_IMAGE_SELECTION' });
-      }
-    });
+  const handleSelectImages = useCallback(async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) return;
+
+    // Ensure content script is injected (handles pages opened before extension loaded)
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js'],
+      });
+      await chrome.scripting.insertCSS({
+        target: { tabId: tab.id },
+        files: ['content.css'],
+      });
+    } catch {
+      // May fail if already injected or on restricted pages — that's fine
+    }
+
+    chrome.tabs.sendMessage(tab.id, { type: 'START_IMAGE_SELECTION' });
   }, []);
 
   const handleRemoveImage = useCallback((index: number) => {
