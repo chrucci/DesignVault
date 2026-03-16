@@ -2,12 +2,14 @@
 
 import * as React from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { createClient } from '@/lib/supabase/client';
+import { ArrowLeft, FileText, Receipt, Image, Download, RefreshCw } from 'lucide-react';
 
 interface DocumentRecord {
   id: string;
@@ -39,6 +41,19 @@ function docTypeLabel(docType: string): string {
       return 'Mood Board';
     default:
       return docType;
+  }
+}
+
+function docTypeIcon(docType: string) {
+  switch (docType) {
+    case 'spec_sheet':
+      return <FileText className="h-4 w-4" />;
+    case 'invoice':
+      return <Receipt className="h-4 w-4" />;
+    case 'mood_board':
+      return <Image className="h-4 w-4" />;
+    default:
+      return <FileText className="h-4 w-4" />;
   }
 }
 
@@ -162,13 +177,22 @@ export default function DocumentsPage() {
   };
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return <div className="p-6 text-muted-foreground">Loading...</div>;
   }
 
   return (
     <div className="space-y-8">
+      {/* Back nav */}
+      <Link
+        href={`/projects/${projectId}`}
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Project
+      </Link>
+
       <div>
-        <h1 className="text-3xl font-bold">{project?.name} — Documents</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{project?.name} — Documents</h1>
         <p className="text-muted-foreground mt-1">Generate and manage project documents</p>
       </div>
 
@@ -176,11 +200,16 @@ export default function DocumentsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         {/* Spec Sheet */}
         <Card className="p-6 space-y-4">
-          <div>
-            <h3 className="font-semibold text-lg">Spec Sheet</h3>
-            <p className="text-sm text-muted-foreground">
-              Product specifications grouped by room. No prices shown.
-            </p>
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-sky-50 p-2.5">
+              <FileText className="h-5 w-5 text-sky-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Spec Sheet</h3>
+              <p className="text-sm text-muted-foreground">
+                Product specifications grouped by room. No prices shown.
+              </p>
+            </div>
           </div>
           <Button
             className="w-full"
@@ -193,11 +222,16 @@ export default function DocumentsPage() {
 
         {/* Invoice */}
         <Card className="p-6 space-y-4">
-          <div>
-            <h3 className="font-semibold text-lg">Invoice</h3>
-            <p className="text-sm text-muted-foreground">
-              Client invoice with retail prices, tax, and shipping.
-            </p>
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-emerald-50 p-2.5">
+              <Receipt className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Invoice</h3>
+              <p className="text-sm text-muted-foreground">
+                Client invoice with retail prices, tax, and shipping.
+              </p>
+            </div>
           </div>
           <div className="space-y-3">
             <div>
@@ -235,11 +269,16 @@ export default function DocumentsPage() {
 
         {/* Mood Board */}
         <Card className="p-6 space-y-4">
-          <div>
-            <h3 className="font-semibold text-lg">Mood Board</h3>
-            <p className="text-sm text-muted-foreground">
-              Visual presentation of products in a landscape format.
-            </p>
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-amber-50 p-2.5">
+              <Image className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">Mood Board</h3>
+              <p className="text-sm text-muted-foreground">
+                Visual presentation of products in a landscape format.
+              </p>
+            </div>
           </div>
           <Button
             className="w-full"
@@ -255,12 +294,22 @@ export default function DocumentsPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Generated Documents</h2>
         {documents.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No documents generated yet.</p>
+          <Card className="p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="rounded-full bg-muted p-4 mb-3">
+                <FileText className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">
+                No documents generated yet. Use the cards above to create one.
+              </p>
+            </div>
+          </Card>
         ) : (
           <div className="space-y-2">
             {documents.map((doc) => (
               <Card key={doc.id} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
+                  <span className="text-muted-foreground">{docTypeIcon(doc.doc_type)}</span>
                   <span className="font-medium">{docTypeLabel(doc.doc_type)}</span>
                   {doc.invoice_number && (
                     <span className="text-sm text-muted-foreground">#{doc.invoice_number}</span>
@@ -275,19 +324,22 @@ export default function DocumentsPage() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant="outline" size="sm" asChild className="gap-1.5">
                     <a href={doc.doc_url} target="_blank" rel="noopener noreferrer" download>
+                      <Download className="h-3.5 w-3.5" />
                       Download
                     </a>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
+                    className="gap-1.5"
                     onClick={() =>
                       generatePdf(doc.doc_type as 'spec_sheet' | 'invoice' | 'mood_board')
                     }
                     disabled={generating !== null}
                   >
+                    <RefreshCw className="h-3.5 w-3.5" />
                     Regenerate
                   </Button>
                 </div>

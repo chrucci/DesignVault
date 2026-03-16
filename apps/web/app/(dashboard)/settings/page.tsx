@@ -4,8 +4,9 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
+import { Receipt, Building2, Trash2, Plus } from 'lucide-react';
 
 interface TaxRate {
   id: string;
@@ -106,36 +107,62 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Settings</h1>
+    <div className="space-y-8 max-w-2xl">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground mt-1">
+          Manage your business details and tax configuration
+        </p>
+      </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Tax Rates</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-amber-50 p-2">
+              <Receipt className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <CardTitle>Tax Rates</CardTitle>
+              <CardDescription>
+                Configure sales tax rates for each state. These are used when generating invoices.
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            {taxRates.map((rate) => (
-              <div key={rate.id} className="flex items-center gap-4">
-                <span className="w-24 font-medium">{rate.state}</span>
-                <span>{rate.rate}%</span>
-                <Button variant="ghost" size="sm" onClick={() => deleteTaxRate(rate.id)}>
-                  Delete
-                </Button>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-end gap-2">
-            <div>
+          {taxRates.length > 0 && (
+            <div className="space-y-2">
+              {taxRates.map((rate) => (
+                <div
+                  key={rate.id}
+                  className="flex items-center gap-4 py-2 px-3 rounded-md bg-muted/50"
+                >
+                  <span className="w-24 font-medium">{rate.state}</span>
+                  <span className="text-muted-foreground">{rate.rate}%</span>
+                  <div className="flex-1" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteTaxRate(rate.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex items-end gap-2 pt-2">
+            <div className="space-y-2">
               <Label htmlFor="new-state">State</Label>
               <Input
                 id="new-state"
                 value={newState}
                 onChange={(e) => setNewState(e.target.value)}
-                placeholder="CA"
+                placeholder="e.g. CT"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="new-rate">Rate (%)</Label>
               <Input
                 id="new-rate"
@@ -143,17 +170,30 @@ export default function SettingsPage() {
                 step="0.01"
                 value={newRate}
                 onChange={(e) => setNewRate(e.target.value)}
-                placeholder="8.25"
+                placeholder="e.g. 6.35"
               />
             </div>
-            <Button onClick={addTaxRate}>Add</Button>
+            <Button onClick={addTaxRate} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Business Information</CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-sky-50 p-2">
+              <Building2 className="h-5 w-5 text-sky-600" />
+            </div>
+            <div>
+              <CardTitle>Business Information</CardTitle>
+              <CardDescription>
+                This information appears on your generated documents like invoices and spec sheets.
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -167,6 +207,7 @@ export default function SettingsPage() {
                   business_name: e.target.value,
                 }))
               }
+              placeholder="e.g. Deborah Lynn Designs"
             />
           </div>
           <div className="space-y-2">
@@ -180,24 +221,29 @@ export default function SettingsPage() {
                   contact_name: e.target.value,
                 }))
               }
+              placeholder="Your full name"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="biz-phone">Phone</Label>
-            <Input
-              id="biz-phone"
-              value={businessInfo.phone ?? ''}
-              onChange={(e) => setBusinessInfo((prev) => ({ ...prev, phone: e.target.value }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="biz-email">Email</Label>
-            <Input
-              id="biz-email"
-              type="email"
-              value={businessInfo.email ?? ''}
-              onChange={(e) => setBusinessInfo((prev) => ({ ...prev, email: e.target.value }))}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="biz-phone">Phone</Label>
+              <Input
+                id="biz-phone"
+                value={businessInfo.phone ?? ''}
+                onChange={(e) => setBusinessInfo((prev) => ({ ...prev, phone: e.target.value }))}
+                placeholder="(555) 123-4567"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="biz-email">Email</Label>
+              <Input
+                id="biz-email"
+                type="email"
+                value={businessInfo.email ?? ''}
+                onChange={(e) => setBusinessInfo((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="you@example.com"
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="biz-address">Address</Label>
@@ -210,9 +256,12 @@ export default function SettingsPage() {
                   address: e.target.value,
                 }))
               }
+              placeholder="123 Main St, City, State ZIP"
             />
           </div>
-          <Button onClick={saveBusinessInfo}>Save</Button>
+          <div className="pt-2">
+            <Button onClick={saveBusinessInfo}>Save Business Info</Button>
+          </div>
         </CardContent>
       </Card>
     </div>

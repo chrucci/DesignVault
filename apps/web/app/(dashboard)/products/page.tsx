@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProductForm } from '@/components/product-form';
 import { ProductCard } from '@/components/product-card';
+import { Package, Plus, Search } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -89,19 +90,54 @@ export default function ProductsPage() {
     return primary?.image_url || product.product_images[0]?.image_url || null;
   };
 
+  const EmptyState = ({ message }: { message: string }) => (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="rounded-full bg-muted p-5 mb-4">
+        <Package className="h-10 w-10 text-muted-foreground" />
+      </div>
+      <p className="text-muted-foreground max-w-sm">{message}</p>
+    </div>
+  );
+
+  const ProductGrid = ({ items }: { items: Product[] }) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+      {items.map((product) => (
+        <ProductCard
+          key={product.id}
+          id={product.id}
+          name={product.name}
+          brand={product.brand}
+          retail_price={product.retail_price}
+          primary_image_url={getPrimaryImageUrl(product)}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Products</h1>
-        <Button onClick={() => setShowCreateDialog(true)}>Add Product</Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <p className="text-muted-foreground mt-1">
+            {products.length} {products.length === 1 ? 'product' : 'products'} in your collection
+          </p>
+        </div>
+        <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Product
+        </Button>
       </div>
 
-      <Input
-        placeholder="Search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="max-w-sm"
-      />
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
 
       <Tabs defaultValue="all" onValueChange={setActiveTab}>
         <TabsList>
@@ -111,43 +147,33 @@ export default function ProductsPage() {
 
         <TabsContent value="all">
           {loading ? (
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground py-8 text-center">Loading...</p>
           ) : filteredProducts.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">No products yet</p>
+            <EmptyState
+              message={
+                search
+                  ? 'No products match your search.'
+                  : 'No products yet. Use the Chrome extension to clip products from supplier websites.'
+              }
+            />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  brand={product.brand}
-                  retail_price={product.retail_price}
-                  primary_image_url={getPrimaryImageUrl(product)}
-                />
-              ))}
-            </div>
+            <ProductGrid items={filteredProducts} />
           )}
         </TabsContent>
 
         <TabsContent value="inbox">
           {loading ? (
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground py-8 text-center">Loading...</p>
           ) : filteredProducts.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center">No products yet</p>
+            <EmptyState
+              message={
+                search
+                  ? 'No unassigned products match your search.'
+                  : 'No unassigned products. All products have been added to rooms.'
+              }
+            />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  brand={product.brand}
-                  retail_price={product.retail_price}
-                  primary_image_url={getPrimaryImageUrl(product)}
-                />
-              ))}
-            </div>
+            <ProductGrid items={filteredProducts} />
           )}
         </TabsContent>
       </Tabs>

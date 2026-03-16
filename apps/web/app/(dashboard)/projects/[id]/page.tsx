@@ -5,11 +5,13 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProjectForm } from '@/components/project-form';
 import { RoomForm } from '@/components/room-form';
 import { RoomProductList } from '@/components/room-product-list';
 import { createClient } from '@/lib/supabase/client';
+import { ArrowLeft, ChevronDown, ChevronRight, Plus, FileText } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -23,16 +25,17 @@ interface Room {
   id: string;
   name: string;
   sort_order: number;
+  room_products: { id: string }[];
 }
 
-function statusBadgeVariant(status: string) {
+function statusBadgeClass(status: string) {
   switch (status) {
     case 'active':
-      return 'bg-green-100 text-green-800';
+      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
     case 'completed':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-teal-100 text-teal-800 border-teal-200';
     case 'archived':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-stone-100 text-stone-600 border-stone-200';
     default:
       return '';
   }
@@ -76,10 +79,10 @@ export default function ProjectDetailPage() {
     const supabase = createClient();
     const { data } = await supabase
       .from('rooms')
-      .select('id, name, sort_order')
+      .select('id, name, sort_order, room_products(id)')
       .eq('project_id', projectId)
       .order('sort_order', { ascending: true });
-    if (data) setRooms(data);
+    if (data) setRooms(data as unknown as Room[]);
   }, [projectId]);
 
   React.useEffect(() => {
@@ -122,13 +125,24 @@ export default function ProjectDetailPage() {
   };
 
   if (!project) {
-    return <div className="p-6">Loading...</div>;
+    return <div className="p-6 text-muted-foreground">Loading...</div>;
   }
 
   if (editing) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Edit Project</h1>
+        <Link
+          href={`/projects/${projectId}`}
+          onClick={(e) => {
+            e.preventDefault();
+            setEditing(false);
+          }}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Project
+        </Link>
+        <h1 className="text-3xl font-bold tracking-tight">Edit Project</h1>
         <ProjectForm
           initialData={{
             id: project.id,
@@ -149,43 +163,101 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <h1 className="text-3xl font-bold">{project.name}</h1>
-        <Badge className={statusBadgeVariant(project.status)}>{statusLabel(project.status)}</Badge>
-      </div>
+      {/* Back nav */}
+      <Link
+        href="/projects"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Projects
+      </Link>
 
-      {project.client_name && <p className="text-muted-foreground">{project.client_name}</p>}
-
-      {project.notes && <p className="text-sm">{project.notes}</p>}
-
-      <div className="flex gap-2">
-        <Button onClick={() => setEditing(true)}>Edit</Button>
-        <Button variant="outline" onClick={() => setAddRoomOpen(true)}>
-          Add Room
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href={`/projects/${projectId}/documents`}>Documents</Link>
-        </Button>
-      </div>
-
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Rooms</h2>
-        {rooms.length === 0 && <p className="text-muted-foreground text-sm">No rooms yet.</p>}
-        {rooms.map((room) => (
-          <div key={room.id} className="border rounded-lg">
-            <button
-              className="w-full text-left px-4 py-3 font-medium hover:bg-accent transition-colors rounded-t-lg"
-              onClick={() => setExpandedRoom(expandedRoom === room.id ? null : room.id)}
-            >
-              {room.name}
-            </button>
-            {expandedRoom === room.id && (
-              <div className="px-4 pb-4">
-                <RoomProductList roomId={room.id} projectId={projectId} />
-              </div>
-            )}
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
+            <Badge className={statusBadgeClass(project.status)}>
+              {statusLabel(project.status)}
+            </Badge>
           </div>
-        ))}
+          {project.client_name && (
+            <p className="text-muted-foreground mt-1">{project.client_name}</p>
+          )}
+          {project.notes && <p className="text-sm mt-2">{project.notes}</p>}
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setEditing(true)} variant="outline">
+            Edit
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={`/projects/${projectId}/documents`} className="gap-2">
+              <FileText className="h-4 w-4" />
+              Documents
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Rooms */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Rooms</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAddRoomOpen(true)}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Room
+          </Button>
+        </div>
+
+        {rooms.length === 0 && (
+          <Card className="p-8">
+            <div className="flex flex-col items-center text-center">
+              <p className="text-muted-foreground">
+                No rooms yet. Add a room to start organizing products.
+              </p>
+            </div>
+          </Card>
+        )}
+
+        <div className="space-y-3">
+          {rooms.map((room) => {
+            const isExpanded = expandedRoom === room.id;
+            const productCount = room.room_products?.length ?? 0;
+
+            return (
+              <Card key={room.id}>
+                <CardHeader className="p-0">
+                  <button
+                    className="w-full text-left px-5 py-4 font-medium hover:bg-accent/50 transition-colors rounded-t-lg flex items-center justify-between"
+                    onClick={() => setExpandedRoom(isExpanded ? null : room.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      )}
+                      <span>{room.name}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {productCount} {productCount === 1 ? 'product' : 'products'}
+                    </span>
+                  </button>
+                </CardHeader>
+                {isExpanded && (
+                  <CardContent className="px-5 pb-5 pt-0">
+                    <RoomProductList roomId={room.id} projectId={projectId} />
+                  </CardContent>
+                )}
+              </Card>
+            );
+          })}
+        </div>
       </div>
 
       <Dialog open={addRoomOpen} onOpenChange={setAddRoomOpen}>

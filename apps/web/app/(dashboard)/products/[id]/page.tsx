@@ -2,11 +2,12 @@
 
 import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { type ProductFormValues } from '@design-vault/shared';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ProductForm } from '@/components/product-form';
 import { ProductImageGallery } from '@/components/product-image-gallery';
+import { ArrowLeft, DollarSign, Ruler, LinkIcon, StickyNote } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -57,6 +59,32 @@ function formatPrice(price: number): string {
     style: 'currency',
     currency: 'USD',
   }).format(price);
+}
+
+function stockStatusLabel(status: string): string {
+  switch (status) {
+    case 'in_stock':
+      return 'In Stock';
+    case 'out_of_stock':
+      return 'Out of Stock';
+    case 'special_order':
+      return 'Special Order';
+    default:
+      return status;
+  }
+}
+
+function stockStatusClass(status: string): string {
+  switch (status) {
+    case 'in_stock':
+      return 'bg-emerald-100 text-emerald-800';
+    case 'out_of_stock':
+      return 'bg-red-100 text-red-800';
+    case 'special_order':
+      return 'bg-amber-100 text-amber-800';
+    default:
+      return '';
+  }
 }
 
 export default function ProductDetailPage() {
@@ -138,17 +166,28 @@ export default function ProductDetailPage() {
   };
 
   if (loading) {
-    return <p className="text-muted-foreground">Loading...</p>;
+    return <p className="text-muted-foreground p-6">Loading...</p>;
   }
 
   if (!product) {
-    return <p className="text-muted-foreground">Product not found</p>;
+    return <p className="text-muted-foreground p-6">Product not found</p>;
   }
 
   if (editing) {
     return (
       <div className="max-w-2xl space-y-6">
-        <h1 className="text-3xl font-bold">Edit Product</h1>
+        <Link
+          href={`/products/${productId}`}
+          onClick={(e) => {
+            e.preventDefault();
+            setEditing(false);
+          }}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Product
+        </Link>
+        <h1 className="text-3xl font-bold tracking-tight">Edit Product</h1>
         <ProductForm
           initialData={{
             name: product.name,
@@ -178,10 +217,42 @@ export default function ProductDetailPage() {
     );
   }
 
+  const hasDimensions =
+    product.dimensions_width ||
+    product.dimensions_depth ||
+    product.dimensions_height ||
+    product.dimensions_text;
+  const hasSpecifications = hasDimensions || product.materials || product.color;
+  const hasLinks = product.source_url || product.spec_url;
+  const hasNotes = product.notes || product.install_notes;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{product.name}</h1>
+      {/* Back nav */}
+      <Link
+        href="/products"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Products
+      </Link>
+
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
+          <div className="flex items-center gap-3 mt-2">
+            {product.brand && <span className="text-muted-foreground">{product.brand}</span>}
+            {product.model_sku && (
+              <span className="text-sm text-muted-foreground">SKU: {product.model_sku}</span>
+            )}
+            {product.stock_status && product.stock_status !== 'unknown' && (
+              <Badge className={stockStatusClass(product.stock_status)}>
+                {stockStatusLabel(product.stock_status)}
+              </Badge>
+            )}
+          </div>
+        </div>
         <div className="flex gap-2">
           <Button onClick={() => setEditing(true)}>Edit</Button>
           <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
@@ -204,142 +275,214 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          {product.brand && (
-            <div>
-              <span className="text-sm text-muted-foreground">Brand</span>
-              <p className="font-medium">{product.brand}</p>
-            </div>
-          )}
-
-          {product.model_sku && (
-            <div>
-              <span className="text-sm text-muted-foreground">Model/SKU</span>
-              <p className="font-medium">{product.model_sku}</p>
-            </div>
-          )}
-
-          <div className="flex gap-8">
-            {product.wholesale_price != null && (
-              <div>
-                <span className="text-sm text-muted-foreground">Wholesale Price</span>
-                <p className="font-medium">{formatPrice(product.wholesale_price)}</p>
-              </div>
-            )}
-
-            {product.markup_percent != null && (
-              <div>
-                <span className="text-sm text-muted-foreground">Markup</span>
-                <p className="font-medium">{product.markup_percent}%</p>
-              </div>
-            )}
-
-            {product.retail_price != null && (
-              <div>
-                <span className="text-sm text-muted-foreground">Retail Price</span>
-                <p className="font-semibold text-lg">{formatPrice(product.retail_price)}</p>
-              </div>
-            )}
-          </div>
-
-          {product.stock_status && product.stock_status !== 'unknown' && (
-            <div>
-              <span className="text-sm text-muted-foreground">Stock Status</span>
-              <p>
-                <Badge variant="secondary">{product.stock_status.replace('_', ' ')}</Badge>
-              </p>
-            </div>
-          )}
-
-          {product.materials && (
-            <div>
-              <span className="text-sm text-muted-foreground">Materials</span>
-              <p className="font-medium">{product.materials}</p>
-            </div>
-          )}
-
-          {product.color && (
-            <div>
-              <span className="text-sm text-muted-foreground">Color</span>
-              <p className="font-medium">{product.color}</p>
-            </div>
-          )}
-
-          {(product.dimensions_width ||
-            product.dimensions_depth ||
-            product.dimensions_height ||
-            product.dimensions_text) && (
-            <div>
-              <span className="text-sm text-muted-foreground">Dimensions</span>
-              {product.dimensions_text ? (
-                <p className="font-medium">{product.dimensions_text}</p>
-              ) : (
-                <p className="font-medium">
-                  {[product.dimensions_width, product.dimensions_depth, product.dimensions_height]
-                    .filter(Boolean)
-                    .join(' x ')}
-                </p>
-              )}
-            </div>
-          )}
-
-          {product.notes && (
-            <div>
-              <span className="text-sm text-muted-foreground">Notes</span>
-              <p className="font-medium">{product.notes}</p>
-            </div>
-          )}
-
-          {product.install_notes && (
-            <div>
-              <span className="text-sm text-muted-foreground">Install Notes</span>
-              <p className="font-medium">{product.install_notes}</p>
-            </div>
-          )}
-
-          {product.source_url && (
-            <div>
-              <span className="text-sm text-muted-foreground">Source</span>
-              <p>
-                <a
-                  href={product.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary underline"
-                >
-                  {product.source_url}
-                </a>
-              </p>
-            </div>
-          )}
-
-          {product.spec_url && (
-            <div>
-              <span className="text-sm text-muted-foreground">Spec Sheet</span>
-              <p>
-                <a
-                  href={product.spec_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary underline"
-                >
-                  {product.spec_url}
-                </a>
-              </p>
-            </div>
-          )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left column - Image gallery (more prominent) */}
+        <div>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Images</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProductImageGallery
+                productId={productId}
+                productName={product.name}
+                images={images}
+                onImagesChange={setImages}
+              />
+            </CardContent>
+          </Card>
         </div>
 
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Images</h2>
-          <Separator className="mb-4" />
-          <ProductImageGallery
-            productId={productId}
-            productName={product.name}
-            images={images}
-            onImagesChange={setImages}
-          />
+        {/* Right column - Product info cards */}
+        <div className="space-y-4">
+          {/* Pricing Card */}
+          {(product.wholesale_price != null || product.retail_price != null) && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  Pricing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap items-baseline gap-6">
+                  {product.retail_price != null && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Retail
+                      </p>
+                      <p className="text-2xl font-bold text-emerald-700">
+                        {formatPrice(product.retail_price)}
+                      </p>
+                    </div>
+                  )}
+                  {product.wholesale_price != null && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Wholesale
+                      </p>
+                      <p className="text-lg font-medium">{formatPrice(product.wholesale_price)}</p>
+                    </div>
+                  )}
+                  {product.markup_percent != null && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Markup
+                      </p>
+                      <p className="text-lg font-medium">{product.markup_percent}%</p>
+                    </div>
+                  )}
+                  {product.retail_price != null && product.wholesale_price != null && (
+                    <>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                          Gross Profit
+                        </p>
+                        <p className="text-lg font-medium text-emerald-700">
+                          {formatPrice(product.retail_price - product.wholesale_price)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                          Margin
+                        </p>
+                        <p className="text-lg font-medium text-emerald-700">
+                          {((1 - product.wholesale_price / product.retail_price) * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                {product.shipping_cost != null && product.shipping_cost > 0 && (
+                  <p className="text-sm text-muted-foreground mt-3">
+                    Shipping: {formatPrice(product.shipping_cost)}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Specifications Card */}
+          {hasSpecifications && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Ruler className="h-4 w-4 text-muted-foreground" />
+                  Specifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {hasDimensions && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Dimensions
+                    </p>
+                    {product.dimensions_text ? (
+                      <p className="font-medium">{product.dimensions_text}</p>
+                    ) : (
+                      <p className="font-medium">
+                        {[
+                          product.dimensions_width,
+                          product.dimensions_depth,
+                          product.dimensions_height,
+                        ]
+                          .filter(Boolean)
+                          .join(' x ')}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {product.materials && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Materials
+                    </p>
+                    <p className="font-medium">{product.materials}</p>
+                  </div>
+                )}
+                {product.color && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Color</p>
+                    <p className="font-medium">{product.color}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Links Card */}
+          {hasLinks && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                  Links
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {product.source_url && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Product Page
+                    </p>
+                    <a
+                      href={product.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline break-all"
+                    >
+                      {product.source_url}
+                    </a>
+                  </div>
+                )}
+                {product.spec_url && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Spec Sheet
+                    </p>
+                    <a
+                      href={product.spec_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline break-all"
+                    >
+                      {product.spec_url}
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Notes Card */}
+          {hasNotes && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <StickyNote className="h-4 w-4 text-muted-foreground" />
+                  Notes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {product.notes && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      General Notes
+                    </p>
+                    <p className="text-sm whitespace-pre-wrap">{product.notes}</p>
+                  </div>
+                )}
+                {product.install_notes && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Install Notes
+                    </p>
+                    <p className="text-sm whitespace-pre-wrap">{product.install_notes}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
