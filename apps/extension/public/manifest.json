@@ -4,6 +4,12 @@
   "version": "1.0.0",
   "description": "Clip products from supplier websites into Design Vault",
   "permissions": ["activeTab", "sidePanel", "storage"],
+  "host_permissions": [
+    "http://localhost:*/*",
+    "http://127.0.0.1:*/*",
+    "https://designvault.wolvernite.com/*",
+    "https://test.designvault.wolvernite.com/*"
+  ],
   "side_panel": {
     "default_path": "sidepanel.html"
   },

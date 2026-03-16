@@ -2,7 +2,8 @@ const TOKEN_KEY = 'dv_auth_token';
 const REFRESH_TOKEN_KEY = 'dv_refresh_token';
 const API_URL_KEY = 'dv_api_url';
 
-const DEFAULT_API_URL = 'https://designvault.wolvernite.com';
+// Default to local dev server; in production builds, override via chrome.storage.local
+const DEFAULT_API_URL = 'http://localhost:3000';
 
 export async function getToken(): Promise<string | null> {
   const result = await chrome.storage.local.get(TOKEN_KEY);
