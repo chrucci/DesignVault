@@ -2,7 +2,7 @@
 
 :root {
   /* Warm, elegant palette for interior design */
-  --background: oklch(0.955 0.02 145);
+  --background: oklch(0.95 0.03 250);
   --foreground: oklch(0.25 0.012 145);
   --muted: oklch(0.92 0.018 145);
   --muted-foreground: oklch(0.45 0.015 145);
