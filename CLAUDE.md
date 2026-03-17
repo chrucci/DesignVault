@@ -69,6 +69,26 @@ pnpm test:e2e                         # Run Playwright tests
 - Docker Compose with web + cloudflared services
 - Environment files: `.env.prod` and `.env.test` (not committed)
 
+## Git Workflow
+
+**Never push directly to main.** All changes must go through a pull request.
+
+When making changes, follow this workflow automatically without being asked:
+
+1. Create a feature branch: `git checkout -b <descriptive-branch-name>`
+2. Make the changes and write/update Playwright tests
+3. Run `/go` to verify lint, typecheck, and tests pass
+4. Stage and commit with a descriptive message
+5. Push the branch: `git push -u origin <branch-name>`
+6. Create a PR and enable auto-merge:
+   ```bash
+   gh pr create --title "..." --body "..."
+   gh pr merge --auto --merge
+   ```
+7. Report the PR URL to the user — done!
+
+CI runs on a self-hosted runner. If Quality Checks and Build pass, the PR auto-merges to main and deploys to production.
+
 ## User Context
 
 - **Deb** is the sole user — an interior decorator, not technical
